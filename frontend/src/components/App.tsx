@@ -20,6 +20,8 @@ interface IData {
   freemem: number;
 }
 
+const BYTES_IN_GB = 1024 * 1024 * 1024;
+
 const App = () => {
   const [data, updateData] = useState<IData>({
     cpus: [],
@@ -36,15 +38,16 @@ const App = () => {
   //   console.log(data);
   // }, [data]);
 
-  const cpuItems = data.cpus.map((d) => (
-    <li key={d.model}>
-      {d.model} {d.speed}
+  const cpuItems = data.cpus.map((item, index) => (
+    <li key={index}>
+      {item.model} {item.speed}
     </li>
   ));
 
   return (
     <div className="app">
-      Memory [free/total]: {data.freemem} / {data.totalmem}
+      Memory [free/total, Gb]: {data.freemem / BYTES_IN_GB} /{" "}
+      {data.totalmem / BYTES_IN_GB}
       <p />
       {cpuItems}
     </div>
