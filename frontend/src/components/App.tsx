@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { atom, useSetRecoilState, useRecoilValue } from "recoil";
+import React, { useEffect } from "react";
+import { atom, useSetRecoilState } from "recoil";
 import { io } from "socket.io-client";
+import MemoryWidget from "./MemoryWidget";
+import CpuWidget from "./CpuWidget";
 import "./App.less";
 
-interface ICpu {
+export interface ICpu {
   model: string;
   speed: number;
   times: {
@@ -21,7 +23,7 @@ interface IData {
   freemem: number;
 }
 
-const systemInfoState = atom({
+export const systemInfoState = atom({
   key: "systemInfoState",
   default: {
     cpus: [],
@@ -30,29 +32,19 @@ const systemInfoState = atom({
   },
 });
 
-const BYTES_IN_GB = 1024 * 1024 * 1024;
-
 const App = () => {
   const setSystemInfo = useSetRecoilState(systemInfoState);
-  const systemInfo = useRecoilValue(systemInfoState);
 
   useEffect(() => {
     const socket = io("http://127.0.0.1:4001");
     socket.on("outgoing data", (data) => setSystemInfo({ ...data }));
   }, []);
 
-  const cpuItems = systemInfo.cpus.map((item: ICpu, index: number) => (
-    <li key={index}>
-      {item.model} {item.speed}
-    </li>
-  ));
-
   return (
     <div className="app">
-      Memory [free/total, Gb]: {(systemInfo.freemem / BYTES_IN_GB).toFixed(2)} /{" "}
-      {(systemInfo.totalmem / BYTES_IN_GB).toFixed(2)}
+      <MemoryWidget />
       <p />
-      <ul>{cpuItems}</ul>
+      <CpuWidget />
     </div>
   );
 };
