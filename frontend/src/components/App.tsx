@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import "./App.less";
+import { atom, useSetRecoilState, useRecoilValue } from "recoil";
 import { io } from "socket.io-client";
+import "./App.less";
 
 interface ICpu {
   model: string;
@@ -20,25 +21,27 @@ interface IData {
   freemem: number;
 }
 
-const BYTES_IN_GB = 1024 * 1024 * 1024;
-
-const App = () => {
-  const [data, updateData] = useState<IData>({
+const systemInfoState = atom({
+  key: "systemInfoState",
+  default: {
     cpus: [],
     totalmem: 0,
     freemem: 0,
-  });
+  },
+});
+
+const BYTES_IN_GB = 1024 * 1024 * 1024;
+
+const App = () => {
+  const setSystemInfo = useSetRecoilState(systemInfoState);
+  const systemInfo = useRecoilValue(systemInfoState);
 
   useEffect(() => {
     const socket = io("http://127.0.0.1:4001");
-    socket.on("outgoing data", (data) => updateData({ ...data }));
+    socket.on("outgoing data", (data) => setSystemInfo({ ...data }));
   }, []);
 
-  // useEffect(() => {
-  //   console.log(data);
-  // }, [data]);
-
-  const cpuItems = data.cpus.map((item, index) => (
+  const cpuItems = systemInfo.cpus.map((item: ICpu, index: number) => (
     <li key={index}>
       {item.model} {item.speed}
     </li>
@@ -46,10 +49,10 @@ const App = () => {
 
   return (
     <div className="app">
-      Memory [free/total, Gb]: {data.freemem / BYTES_IN_GB} /{" "}
-      {data.totalmem / BYTES_IN_GB}
+      Memory [free/total, Gb]: {(systemInfo.freemem / BYTES_IN_GB).toFixed(2)} /{" "}
+      {(systemInfo.totalmem / BYTES_IN_GB).toFixed(2)}
       <p />
-      {cpuItems}
+      <ul>{cpuItems}</ul>
     </div>
   );
 };
