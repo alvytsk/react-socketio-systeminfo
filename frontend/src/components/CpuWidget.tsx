@@ -7,7 +7,8 @@ const CpuWidget = () => {
 
   const cpuItems = cpus.map((item: ICpu, index: number) => (
     <li key={index}>
-      {item.model} {item.speed}
+      {item.model} <p />
+      Current speed: {(item.speed / 1024).toFixed(2)} GHz
     </li>
   ));
 
